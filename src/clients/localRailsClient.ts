@@ -59,7 +59,7 @@ export class LocalRailsClient {
 					rescue => e
 						puts "${OUTPUT_DELIMITER}"
 						puts "Error: #{e.message}"
-						exit 1
+						Kernel.exit 1
 					end
 EOF
 			`);
