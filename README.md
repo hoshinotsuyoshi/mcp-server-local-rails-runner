@@ -1,6 +1,6 @@
-# MCP Server: SSH Rails Runner
+# MCP Server: Local Rails Runner
 
-An MCP server that enables secure remote execution of Rails console commands via SSH. This server provides tools for both read-only operations and carefully managed mutations in a deployed Rails environment.
+An MCP server that enables local execution of Rails console commands. This server provides tools for both read-only operations and carefully managed mutations in your local Rails environment.
 
 This works great with Cursor. You can use Cursor Composer to pull in your Rails model files as context and then use the `execute_read_only`, `dry_run_mutate`, and `execute_mutate` tools to make changes to the database. No need to trudge through complicated Admin UI's to get your data wrangling and analysis done.
 
@@ -10,11 +10,18 @@ This works great with Cursor. You can use Cursor Composer to pull in your Rails 
 
 ## Features
 
-- Remote Rails console execution over SSH
+- Local Rails console execution
 - Safe read-only operations
 - Dry-run capability for mutations
 - Execution of approved mutations
 - Resource management for code snippets
+
+## Prerequisites
+
+- Ruby and Rails installed locally
+- Bundler installed
+- Access to the Rails application directory
+- Node.js and npm installed
 
 ## Installation
 
@@ -25,13 +32,15 @@ npm run build
 
 ## Configuration
 
-Set the following environment variables:
+Set the following environment variable:
 
 ```bash
-SSH_HOST=your.remote.host
-SSH_USER=your_ssh_user
-SSH_PRIVATE_KEY_PATH=your_SSH_PRIVATE_KEY_PATH
 RAILS_WORKING_DIR=/path/to/rails/app
+```
+
+Optionally, you can also set:
+```bash
+PROJECT_NAME_AS_CONTEXT=your_project_name
 ```
 
 ## Usage with Claude Desktop
@@ -41,13 +50,10 @@ Add to your Claude Desktop configuration:
 ```json
 {
 	"mcpServers": {
-		"ssh-rails-runner": {
+		"local-rails-runner": {
 			"command": "npx",
-			"args": ["mcp-server-ssh-rails-runner"],
+			"args": ["mcp-server-local-rails-runner"],
 			"env": {
-				"SSH_HOST": "your.remote.host",
-				"SSH_USER": "your_ssh_user",
-				"SSH_PRIVATE_KEY_PATH": "your_SSH_PRIVATE_KEY_PATH",
 				"RAILS_WORKING_DIR": "/path/to/rails/app/root"
 			}
 		}
@@ -57,7 +63,7 @@ Add to your Claude Desktop configuration:
 
 ## Available Tools
 
-### run_read_only
+### execute_read_only
 
 Executes read-only Rails console operations. The tool will analyze the request, formulate safe read-only commands, and return the results.
 
@@ -71,8 +77,10 @@ Executes previously approved mutation code snippets. Requires explicit user appr
 
 ## Security Considerations
 
-- Only use with trusted SSH endpoints from your own local machine that is (temporarily) provided access to the remote environment
+- Ensure your Rails environment is properly configured
 - Review all mutations before execution
+- Be careful with production databases
+- Make sure your Rails application's dependencies are properly installed
 
 ## License
 
