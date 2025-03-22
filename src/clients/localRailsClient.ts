@@ -120,23 +120,45 @@ EOF
 			// Find the delimiter and take everything after it
 			const parts = result.split(/===RAILS_OUTPUT_DELIMITER_[a-z0-9]+=== */);
 			
+			if (parts.length < 2) {
+				console.error("No delimiter found in output");
+				return result.trim();
+			}
+			
 			// Get the last part (after the delimiter)
 			let output = parts[parts.length - 1].trim();
 			
-			// Remove any npm output or other noise that might appear
-			output = output.split('\n')
-				.filter(line => !line.startsWith('>'))
-				.filter(line => line.trim() !== '')
-				.join('\n');
+			// Remove any npm output or other noise
+			output = output
+				.split('\n')
+				.filter(line => {
+					const trimmedLine = line.trim();
+					return (
+						trimmedLine !== '' &&
+						!trimmedLine.startsWith('>') &&
+						!trimmedLine.startsWith('npm') &&
+						!trimmedLine.includes('node_modules')
+					);
+				})
+				.join('\n')
+				.trim();
+
+			// Handle Ruby inspect output
+			if (output.startsWith('"') && output.endsWith('"')) {
+				try {
+					output = JSON.parse(output);
+				} catch (e) {
+					// If it's not valid JSON, leave it as is
+				}
+			}
 
 			// Try to parse as JSON if it looks like JSON
 			if (output.startsWith('{') || output.startsWith('[')) {
 				try {
-					const parsed = JSON.parse(output);
-					return JSON.stringify(parsed);
+					return JSON.stringify(JSON.parse(output));
 				} catch (e) {
-					// If JSON parsing fails, return as-is
 					console.error("JSON parse error:", e);
+					return output;
 				}
 			}
 
@@ -144,7 +166,6 @@ EOF
 		} catch (error) {
 			console.error("Parse error:", error);
 			console.error("Raw result:", result);
-			// If anything goes wrong, return the original trimmed string
 			return result.trim();
 		}
 	}

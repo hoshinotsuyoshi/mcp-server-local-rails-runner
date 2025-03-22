@@ -44,11 +44,19 @@ const server = new Server(
 	{
 		name: "local-rails-runner",
 		version: "1.0.0",
+		displayName: "Local Rails Runner",
+		description: "A server for running Rails commands locally",
 	},
 	{
 		capabilities: {
-			tools: {},
-			resources: {},
+			tools: {
+				executeReadOnly: true,
+				dryRunMutate: true,
+				executeMutate: true,
+			},
+			resources: {
+				codeSnippets: true,
+			},
 		},
 	}
 );
@@ -126,6 +134,13 @@ async function main() {
 		});
 		const transport = new StdioServerTransport();
 		await server.connect(transport);
+		
+		// Send initial server info
+		process.stderr.write(JSON.stringify({
+			type: "serverInfo",
+			serverInfo: server.info,
+		}) + "\n");
+		
 		console.error("Local Rails Runner MCP Server running");
 	} catch (error) {
 		console.error("Failed to start server:", error);
