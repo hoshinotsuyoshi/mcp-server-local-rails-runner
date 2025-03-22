@@ -51,8 +51,13 @@ Add to your Claude Desktop configuration:
 {
 	"mcpServers": {
 		"local-rails-runner": {
-			"command": "npx",
-			"args": ["mcp-server-local-rails-runner"],
+			"command": "npm",
+			"args": [
+				"-C",
+				"/Users/hoshino/ghq/github.com/hoshinotsuyoshi/mcp-server-local-rails-runner",
+				"run",
+				"start"
+			],
 			"env": {
 				"RAILS_WORKING_DIR": "/path/to/rails/app/root"
 			}
