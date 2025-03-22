@@ -117,11 +117,28 @@ EOF
 
 	private parseResult(result: string): string {
 		try {
-			// Find the delimiter and take everything after it up to 'nil'
+			// Find the delimiter and take everything after it
 			const parts = result.split(/===RAILS_OUTPUT_DELIMITER_[a-z0-9]+=== */);
-
+			
 			// Get the last part (after the delimiter)
-			const output = parts[parts.length - 1];
+			let output = parts[parts.length - 1].trim();
+			
+			// Remove any npm output or other noise that might appear
+			output = output.split('\n')
+				.filter(line => !line.startsWith('>'))
+				.filter(line => line.trim() !== '')
+				.join('\n');
+
+			// Try to parse as JSON if it looks like JSON
+			if (output.startsWith('{') || output.startsWith('[')) {
+				try {
+					const parsed = JSON.parse(output);
+					return JSON.stringify(parsed);
+				} catch (e) {
+					// If JSON parsing fails, return as-is
+					console.error("JSON parse error:", e);
+				}
+			}
 
 			return output;
 		} catch (error) {
