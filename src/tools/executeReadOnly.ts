@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SSHRailsClient } from "../clients/sshRailsClient.js";
+import { LocalRailsClient } from "../clients/localRailsClient.js";
 
 const ExecuteReadOnlyArgsSchema = z.object({
 	code: z.string().min(1),
@@ -31,13 +31,13 @@ export const executeReadOnlyToolDefinition = {
 
 export async function executeReadOnly(
 	args: ExecuteReadOnlyArgs,
-	sshRailsClient: SSHRailsClient
+	railsClient: LocalRailsClient
 ) {
 	const validatedArgs = ExecuteReadOnlyArgsSchema.parse(args);
 
 	try {
 		// Verify the code is read-only before execution
-		const isReadOnly = await sshRailsClient.verifyReadOnly(validatedArgs.code);
+		const isReadOnly = await railsClient.verifyReadOnly(validatedArgs.code);
 		if (!isReadOnly) {
 			throw new Error(
 				"The provided code contains potential mutations and cannot be executed in read-only mode"
@@ -45,7 +45,7 @@ export async function executeReadOnly(
 		}
 
 		// Execute the read-only operation
-		const result = await sshRailsClient.executeReadOnly(validatedArgs.code);
+		const result = await railsClient.executeReadOnly(validatedArgs.code);
 
 		return {
 			content: [

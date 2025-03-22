@@ -1,4 +1,4 @@
-import { SSHRailsClient } from "./sshRailsClient.js";
+import { LocalRailsClient } from "./localRailsClient.js";
 
 export interface MutationAnalysis {
 	validationStatus: "valid" | "invalid" | "warning";
@@ -7,13 +7,13 @@ export interface MutationAnalysis {
 }
 
 export class MutationAnalysisClient {
-	constructor(private sshRailsClient: SSHRailsClient) {}
+	constructor(private railsClient: LocalRailsClient) {}
 
 	async analyzeMutation(
 		mutateCode: string,
 		dryRunCode: string
 	): Promise<MutationAnalysis> {
-		const dryRunResult = await this.sshRailsClient.execute(dryRunCode);
+		const dryRunResult = await this.railsClient.execute(dryRunCode);
 
 		return {
 			validationStatus: this.validateMutation(mutateCode),

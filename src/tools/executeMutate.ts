@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SSHRailsClient } from "../clients/sshRailsClient.js";
+import { LocalRailsClient } from "../clients/localRailsClient.js";
 import { CodeSnippetClient } from "../clients/codeSnippetClient.js";
 
 const ExecuteMutateArgsSchema = z.object({
@@ -32,7 +32,7 @@ export const executeMutateToolDefinition = {
 
 export async function executeMutate(
 	args: ExecuteMutateArgs,
-	sshRailsClient: SSHRailsClient,
+	railsClient: LocalRailsClient,
 	codeSnippetClient: CodeSnippetClient
 ) {
 	const validatedArgs = ExecuteMutateArgsSchema.parse(args);
@@ -44,7 +44,7 @@ export async function executeMutate(
 		);
 
 		// Execute the mutation
-		const result = await sshRailsClient.execute(snippet.code);
+		const result = await railsClient.execute(snippet.code);
 
 		return {
 			content: [
