@@ -136,11 +136,12 @@ async function main() {
 		await server.connect(transport);
 		
 		// Send initial server info
-		process.stderr.write(JSON.stringify({
-			type: "serverInfo",
-			serverInfo: server.info,
-		}) + "\n");
-		
+		process.stderr.write(
+			JSON.stringify({
+				type: "serverInfo",
+			}) + "\n"
+		);
+
 		console.error("Local Rails Runner MCP Server running");
 	} catch (error) {
 		console.error("Failed to start server:", error);

@@ -51,7 +51,7 @@ export class LocalRailsClient {
 		try {
 			const { stdout, stderr } = await execAsync(`
 				cd "${this.workingDir}" &&
-				RAILS_ENV=production bundle exec rails c <<-EOF
+				RAILS_ENV=development bundle exec rails c <<-EOF
 					begin
 						result = ${command}
 						puts "${OUTPUT_DELIMITER}"
