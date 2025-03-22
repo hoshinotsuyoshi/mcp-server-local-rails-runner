@@ -7,7 +7,7 @@ import {
 	ListResourcesRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { SSHRailsClient } from "./clients/sshRailsClient.js";
+import { LocalRailsClient } from "./clients/localRailsClient.js";
 import { CodeSnippetClient } from "./clients/codeSnippetClient.js";
 import {
 	dryRunMutate,
@@ -29,23 +29,20 @@ dotenv.config();
 // Environment validation
 const envVars = z
 	.object({
-		SSH_HOST: z.string(),
-		SSH_USER: z.string(),
-		SSH_PRIVATE_KEY_PATH: z.string(),
 		RAILS_WORKING_DIR: z.string(),
 		PROJECT_NAME_AS_CONTEXT: z.string().optional(),
 	})
 	.parse(process.env);
 
-// Initialize SSH client
-const sshRailsClient = new SSHRailsClient();
+// Initialize clients
+const railsClient = new LocalRailsClient();
 const codeSnippetClient = new CodeSnippetClient();
-const mutationAnalysisClient = new MutationAnalysisClient(sshRailsClient);
+const mutationAnalysisClient = new MutationAnalysisClient(railsClient);
 
 // Initialize server
 const server = new Server(
 	{
-		name: "ssh-rails-runner",
+		name: "local-rails-runner",
 		version: "1.0.0",
 	},
 	{
@@ -70,7 +67,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 	switch (name) {
 		case executeReadOnlyToolDefinition.name:
-			return executeReadOnly(args as ExecuteReadOnlyArgs, sshRailsClient);
+			return executeReadOnly(args as ExecuteReadOnlyArgs, railsClient);
 
 		case dryRunMutateToolDefinition.name:
 			return dryRunMutate(
@@ -82,7 +79,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 		case executeMutateToolDefinition.name:
 			return executeMutate(
 				args as ExecuteMutateArgs,
-				sshRailsClient,
+				railsClient,
 				codeSnippetClient
 			);
 
@@ -124,15 +121,12 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 // Start server
 async function main() {
 	try {
-		await sshRailsClient.connect({
-			host: envVars.SSH_HOST,
-			username: envVars.SSH_USER,
-			privateKeyPath: envVars.SSH_PRIVATE_KEY_PATH,
+		await railsClient.connect({
 			workingDir: envVars.RAILS_WORKING_DIR,
 		});
 		const transport = new StdioServerTransport();
 		await server.connect(transport);
-		console.error("SSH Rails Runner MCP Server running");
+		console.error("Local Rails Runner MCP Server running");
 	} catch (error) {
 		console.error("Failed to start server:", error);
 		process.exit(1);
